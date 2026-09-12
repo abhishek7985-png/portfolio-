@@ -1,5 +1,5 @@
+import API, { IMAGE_URL } from "../api/axios";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const API = "http://localhost:5000/api";
@@ -41,10 +41,10 @@ export default function AdminDashboard() {
   const loadAll = async () => {
     try {
       const [i, p, s, pr] = await Promise.all([
-        axios.get(`${API}/inquiry`, { headers }),
-        axios.get(`${API}/project`),
-        axios.get(`${API}/skill`),
-        axios.get(`${API}/profile`),
+        API.get("/inquiry"),
+        API.get("/project"),
+        API.get("/skill"),
+        API.get("/profile"),
       ]);
       setInquiries(i.data);
       setProjects(p.data);
@@ -70,8 +70,8 @@ export default function AdminDashboard() {
       if (newProject[k] !== null) fd.append(k, newProject[k]);
     });
     try {
-      await axios.post(`${API}/project`, fd, {
-        headers: { ...headers, "Content-Type": "multipart/form-data" },
+      await API.post("/project", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
       setNewProject({
         title: "",
@@ -91,15 +91,14 @@ export default function AdminDashboard() {
 
   const deleteProject = async (id) => {
     if (!window.confirm("Delete this project?")) return;
-    await axios.delete(`${API}/project/${id}`, { headers });
+    await API.delete(`/project/${id}`);
     notify("🗑️ Deleted");
     loadAll();
   };
 
-  // ---- SKILLS ----
   const addSkill = async (e) => {
     e.preventDefault();
-    await axios.post(`${API}/skill`, newSkill, { headers });
+    await API.post("/skill", newSkill);
     setNewSkill({ name: "", level: "", category: "Frontend" });
     notify("✅ Skill added!");
     loadAll();
@@ -107,41 +106,35 @@ export default function AdminDashboard() {
 
   const deleteSkill = async (id) => {
     if (!window.confirm("Delete skill?")) return;
-    await axios.delete(`${API}/skill/${id}`, { headers });
+    await API.delete(`/skill/${id}`);
     loadAll();
   };
 
-  // ---- INQUIRIES ----
   const deleteInquiry = async (id) => {
     if (!window.confirm("Delete inquiry?")) return;
-    await axios.delete(`${API}/inquiry/${id}`, { headers });
+    await API.delete(`/inquiry/${id}`);
     loadAll();
   };
 
   const sendReply = async (id) => {
     if (!reply.text.trim()) return notify("❌ Write reply first");
     try {
-      await axios.post(
-        `${API}/inquiry/${id}/reply`,
-        { replyText: reply.text },
-        { headers },
-      );
+      await API.post(`/inquiry/${id}/reply`, { replyText: reply.text });
       notify("✅ Reply sent via email!");
       setReply({ id: "", text: "" });
       loadAll();
-    } catch (e) {
+    } catch {
       notify("❌ Email failed — check .env credentials");
     }
   };
 
-  // ---- PROFILE ----
   const updateProfile = async (e) => {
     e.preventDefault();
     const fd = new FormData();
     Object.keys(editProfile).forEach((k) => fd.append(k, editProfile[k] || ""));
     if (profileImg) fd.append("profileImage", profileImg);
-    await axios.put(`${API}/profile`, fd, {
-      headers: { ...headers, "Content-Type": "multipart/form-data" },
+    await API.put("/profile", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
     notify("✅ Profile updated!");
     setProfileImg(null);
