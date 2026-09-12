@@ -1,4 +1,8 @@
-import API, { IMAGE_URL } from "../api/axios";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "motion/react";
+import * as api from "../api/api";
+import { IMAGE_URL } from "../api/axios";
 import {
   FaGithub,
   FaLinkedin,
@@ -13,7 +17,6 @@ import "../styles/Home.css";
 export default function Home() {
   const [projects, setProjects] = useState([]);
   const [skills, setSkills] = useState([]);
-  const navigate = useNavigate();
   const [profile, setProfile] = useState({});
   const [form, setForm] = useState({
     name: "",
@@ -23,18 +26,28 @@ export default function Home() {
   });
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(`${API}/profile`).then((r) => setProfile(r.data));
-    axios.get(`${API}/project`).then((r) => setProjects(r.data));
-    axios.get(`${API}/skill`).then((r) => setSkills(r.data));
+    api
+      .getProfile()
+      .then((r) => setProfile(r.data))
+      .catch(() => {});
+    api
+      .getProjects()
+      .then((r) => setProjects(r.data))
+      .catch(() => {});
+    api
+      .getSkills()
+      .then((r) => setSkills(r.data))
+      .catch(() => {});
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${API}/inquiry`, form);
+      await api.sendInquiry(form);
       setStatus("✅ Message sent! I will reply soon.");
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch {
@@ -76,7 +89,6 @@ export default function Home() {
               <a href="#contact">Contact</a>
             </li>
           </ul>
-          {/* 👇 ADMIN BUTTON */}
           <button
             className="admin-btn"
             onClick={() => navigate("/admin")}
@@ -143,10 +155,7 @@ export default function Home() {
           >
             <div className="glow-circle"></div>
             {profile.profileImage && (
-              <img
-                src={`http://localhost:5000${profile.profileImage}`}
-                alt="profile"
-              />
+              <img src={`${IMAGE_URL}${profile.profileImage}`} alt="profile" />
             )}
           </motion.div>
         </div>
@@ -232,10 +241,7 @@ export default function Home() {
               >
                 {p.image && (
                   <div className="project-img">
-                    <img
-                      src={`http://localhost:5000${p.image}`}
-                      alt={p.title}
-                    />
+                    <img src={`${IMAGE_URL}${p.image}`} alt={p.title} />
                   </div>
                 )}
                 <div className="project-info">
@@ -323,9 +329,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FOOTER */}
       <footer className="bg-slate-950 text-white border-t border-slate-800">
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
-          ```
           {/* Main Footer */}
           <div className="py-12 md:py-14 grid grid-cols-1 md:grid-cols-2 gap-10">
             {/* Profile */}
@@ -339,7 +345,6 @@ export default function Home() {
                   <h2 className="text-xl font-bold">
                     {profile.name || "Abhishek Mishra"}
                   </h2>
-
                   <p className="text-sm text-blue-400">Full Stack Developer</p>
                 </div>
               </div>
@@ -356,9 +361,7 @@ export default function Home() {
                   (tech) => (
                     <span
                       key={tech}
-                      className="px-3 py-1 rounded-full text-xs
-                       bg-slate-900 border border-slate-800
-                       text-slate-400"
+                      className="px-3 py-1 rounded-full text-xs bg-slate-900 border border-slate-800 text-slate-400"
                     >
                       {tech}
                     </span>
@@ -378,17 +381,11 @@ export default function Home() {
                       href={profile.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 text-slate-400
-                       hover:text-white transition-all duration-200"
+                      className="flex items-center gap-3 text-slate-400 hover:text-white transition-all duration-200"
                     >
-                      <span
-                        className="w-9 h-9 rounded-lg bg-slate-900
-                             border border-slate-800
-                             flex items-center justify-center"
-                      >
+                      <span className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
                         <i className="fab fa-github"></i>
                       </span>
-
                       <span>GitHub</span>
                     </a>
                   )}
@@ -398,17 +395,11 @@ export default function Home() {
                       href={profile.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 text-slate-400
-                       hover:text-white transition-all duration-200"
+                      className="flex items-center gap-3 text-slate-400 hover:text-white transition-all duration-200"
                     >
-                      <span
-                        className="w-9 h-9 rounded-lg bg-slate-900
-                             border border-slate-800
-                             flex items-center justify-center"
-                      >
+                      <span className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
                         <i className="fab fa-linkedin-in"></i>
                       </span>
-
                       <span>LinkedIn</span>
                     </a>
                   )}
@@ -416,17 +407,11 @@ export default function Home() {
                   {profile.email && (
                     <a
                       href={`mailto:${profile.email}`}
-                      className="flex items-center gap-3 text-slate-400
-                       hover:text-white transition-all duration-200"
+                      className="flex items-center gap-3 text-slate-400 hover:text-white transition-all duration-200"
                     >
-                      <span
-                        className="w-9 h-9 rounded-lg bg-slate-900
-                             border border-slate-800
-                             flex items-center justify-center"
-                      >
+                      <span className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
                         <i className="fas fa-envelope"></i>
                       </span>
-
                       <span>{profile.email}</span>
                     </a>
                   )}
@@ -434,12 +419,9 @@ export default function Home() {
               </div>
             </div>
           </div>
+
           {/* Bottom Footer */}
-          <div
-            className="border-t border-slate-800 py-5
-                flex flex-col sm:flex-row
-                items-center justify-between gap-3"
-          >
+          <div className="border-t border-slate-800 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-sm text-slate-500 text-center sm:text-left">
               © {new Date().getFullYear()}{" "}
               <span className="text-slate-300">
@@ -453,7 +435,6 @@ export default function Home() {
               PHP
             </p>
           </div>
-          ```
         </div>
       </footer>
     </div>
