@@ -2,8 +2,6 @@ import API, { IMAGE_URL } from "../api/axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API = "http://localhost:5000/api";
-
 export default function AdminDashboard() {
   const [tab, setTab] = useState("inquiries");
   const [inquiries, setInquiries] = useState([]);

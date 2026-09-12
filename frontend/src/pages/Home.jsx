@@ -10,8 +10,6 @@ import {
 } from "react-icons/fa";
 import "../styles/Home.css";
 
-const API = "http://localhost:5000/api";
-
 export default function Home() {
   const [projects, setProjects] = useState([]);
   const [skills, setSkills] = useState([]);
